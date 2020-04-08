@@ -37,7 +37,8 @@ pub unsafe extern "C" fn microvmi_init(
     } else {
         Some(driver_type.read())
     };
-    let driver = init(&safe_domain_name, optional_driver_type);
+    // TODO support passing driver init param
+    let driver = init(&safe_domain_name, optional_driver_type, None);
     let inferred_driver_type = driver.get_driver_type();
     Box::into_raw(Box::new(MicrovmiContext {
         driver: Box::into_raw(driver) as *mut c_void,

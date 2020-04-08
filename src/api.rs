@@ -14,6 +14,27 @@ pub enum DriverType {
     Xen,
 }
 
+/// Supports passing initialization parameters to the driver
+///
+/// Some drivers can support optional extra initialization parameters.
+///
+/// This is required to initialize the KVM driver, which needs a `domain_name` and
+/// a `kvm_socket` parameters.
+///
+/// This is equivalent to LibVMI's `vmi_init_data_type_t`
+///
+/// # Examples
+///
+/// ```
+///let kvmi_socket = DriverInitParam::KVMiSocket(String::from("/tmp/introspector"));
+///let mut drv = microvmi::init(domain_name, DriverType::KVM, Some(kvmi_socket));
+/// ```
+#[repr(C)]
+#[derive(Debug)]
+pub enum DriverInitParam {
+    KVMiSocket(String),
+}
+
 #[repr(C)]
 #[derive(Debug)]
 pub struct X86Registers {

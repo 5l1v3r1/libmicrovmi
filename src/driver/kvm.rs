@@ -6,8 +6,8 @@ use std::vec::Vec;
 use kvmi::{KVMi, KVMiCr, KVMiEvent, KVMiEventReply, KVMiEventType, KVMiInterceptType};
 
 use crate::api::{
-    CrType, DriverType, Event, EventReplyType, EventType, InterceptType, Introspectable, Registers,
-    X86Registers,
+    CrType, DriverInitParam, DriverType, Event, EventReplyType, EventType, InterceptType,
+    Introspectable, Registers, X86Registers,
 };
 
 // unit struct
@@ -20,11 +20,12 @@ pub struct Kvm {
 }
 
 impl Kvm {
-    pub fn new(domain_name: &str) -> Self {
-        let socket_path = "/tmp/introspector";
+    pub fn new(domain_name: &str, init_option: Option<DriverInitParam>) -> Self {
+        let DriverInitParam::KVMiSocket(socket_path) = init_option
+            .expect("KVM driver initialization requires an additional socket parameter.");
         debug!("init on {} (socket: {})", domain_name, socket_path);
         let mut kvm = Kvm {
-            kvmi: KVMi::new(socket_path),
+            kvmi: KVMi::new(&socket_path),
             expect_pause_ev: 0,
             vec_events: Vec::new(),
         };
