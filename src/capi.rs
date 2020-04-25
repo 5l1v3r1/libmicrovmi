@@ -1,4 +1,4 @@
-use crate::api::{DriverType, Introspectable, Registers};
+use crate::api::{DriverType, Introspectable, Registers, DriverInitParam};
 use crate::driver::dummy::Dummy;
 #[cfg(feature = "hyper-v")]
 use crate::driver::hyperv::HyperV;
@@ -30,6 +30,7 @@ pub enum MicrovmiStatus {
 pub unsafe extern "C" fn microvmi_init(
     domain_name: *const c_char,
     driver_type: *const DriverType,
+    driver_init_option: *const DriverInitParam
 ) -> *mut MicrovmiContext {
     let safe_domain_name = CStr::from_ptr(domain_name).to_string_lossy().into_owned();
     let optional_driver_type: Option<DriverType> = if driver_type.is_null() {
@@ -37,8 +38,12 @@ pub unsafe extern "C" fn microvmi_init(
     } else {
         Some(driver_type.read())
     };
-    // TODO support passing driver init param
-    let driver = init(&safe_domain_name, optional_driver_type, None);
+    let init_option: Option<DriverInitParam> = if driver_init_option.is_null() {
+        None
+    } else {
+        Some(driver_init_option.read())
+    };
+    let driver = init(&safe_domain_name, optional_driver_type, init_option);
     let inferred_driver_type = driver.get_driver_type();
     Box::into_raw(Box::new(MicrovmiContext {
         driver: Box::into_raw(driver) as *mut c_void,
